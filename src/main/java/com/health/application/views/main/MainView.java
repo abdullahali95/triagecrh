@@ -37,7 +37,6 @@ public class MainView extends VerticalLayout {
     private AdmissionService admissionService;
     private PatientService patientService;
     private WardService wardService;
-    private PatientForm ptForm;
     private AdmissionForm admissionForm;
 
     public MainView(AdmissionService admissionService, PatientService patientService,
@@ -55,7 +54,7 @@ public class MainView extends VerticalLayout {
         VerticalLayout forms = new VerticalLayout();
         forms.addClassName("forms");
 
-        forms.add(ptForm, admissionForm);
+        forms.add(admissionForm);
         content = new SplitLayout(grid, forms);
         content.addClassName("content");
         content.setSizeFull();
@@ -119,12 +118,7 @@ public class MainView extends VerticalLayout {
 
     private void configureForm() {
         //Setup Admission Form
-        ptForm = new PatientForm();
         admissionForm = new AdmissionForm(wardService.findAll());
-
-        ptForm.addListener(PatientForm.SaveEvent.class, this::savePatient);
-        ptForm.addListener(PatientForm.DeleteEvent.class, this::deletePatient);
-        ptForm.addListener(PatientForm.CloseEvent.class, e -> closeEditor());
 
         admissionForm.addListener(AdmissionForm.SaveEvent.class, this::saveAdmission);
         admissionForm.addListener(AdmissionForm.DeleteEvent.class, this::deleteAdmission);
@@ -165,10 +159,6 @@ public class MainView extends VerticalLayout {
         if (admission == null) {
             closeEditor();
         } else {
-
-            ptForm.setPatient(admission.getPatient());
-            ptForm.setVisible(true);
-
             admissionForm.setAdmission(admission);
             admissionForm.setVisible(true);
             addClassName("editing");
@@ -177,9 +167,6 @@ public class MainView extends VerticalLayout {
     }
 
     private void closeEditor() {
-        ptForm.setPatient(null);
-        ptForm.setVisible(false);
-
         admissionForm.setAdmission(null);
         admissionForm.setVisible(false);
         removeClassName("editing");
@@ -190,29 +177,18 @@ public class MainView extends VerticalLayout {
         grid.asSingleSelect().clear();
         Admission ad = new Admission();
         ad.setPatient(new Patient());
-        editAdmission(new Admission());
+        editAdmission(ad);
     }
 
     private void saveAdmission(AdmissionForm.SaveEvent event) {
+        patientService.save(event.getAdmission().getPatient());
         admissionService.save(event.getAdmission());
-        updateList();
-        closeEditor();
-    }
-
-    private void savePatient(PatientForm.SaveEvent event) {
-        patientService.save(event.getPatient());
         updateList();
         closeEditor();
     }
 
     private void deleteAdmission(AdmissionForm.DeleteEvent event) {
         admissionService.delete(event.getAdmission());
-        updateList();
-        closeEditor();
-    }
-
-    private void deletePatient(PatientForm.DeleteEvent event) {
-        patientService.delete(event.getPatient());
         updateList();
         closeEditor();
     }

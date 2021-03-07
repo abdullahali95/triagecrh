@@ -28,6 +28,11 @@ import java.util.function.DoubleToIntFunction;
 public class AdmissionForm extends FormLayout {
 
     private Admission admission;
+    TextField firstName = new TextField("First name");
+    TextField lastName = new TextField("Last name");
+    DatePicker dob = new DatePicker("Date of Birth");
+    IntegerField hospId = new IntegerField("Hosp No:");
+    NumberField nhsId = new NumberField("NHS No:");
 
     DatePicker dateAdmission = new DatePicker("Date of Admission");
     TimePicker timeAdmission = new TimePicker("Time of Admission");
@@ -45,19 +50,18 @@ public class AdmissionForm extends FormLayout {
     Binder<Admission> admissionBinder = new BeanValidationBinder<>(Admission.class);
 
 
+
     public AdmissionForm(List<Ward> wards) {
         addClassName("admission-form");
 
+        bindFields();
         admissionBinder.bindInstanceFields(this);
         ward.setItems(wards);
         ward.setItemLabelGenerator(Ward::getWardName);
-        add(dateAdmission, timeAdmission, ward, pc, news, clerked, postTaken,
+        add(hospId, firstName, lastName, dob, nhsId,dateAdmission,
+                timeAdmission, ward, pc, news, clerked, postTaken,
         createButtonsLayout());
         bindFields();
-    }
-
-    private void bindFields() {
-
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -71,7 +75,6 @@ public class AdmissionForm extends FormLayout {
         save.addClickListener(event -> validateAndSave());
         delete.addClickListener(event -> fireEvent(new DeleteEvent(this, admission)));
         close.addClickListener(event -> fireEvent(new CloseEvent(this)));
-
 
         admissionBinder.addStatusChangeListener(e -> save.setEnabled(admissionBinder.isValid()));
 
@@ -90,6 +93,91 @@ public class AdmissionForm extends FormLayout {
         } catch (ValidationException e) {
             e.printStackTrace();
         }
+    }
+
+    private void bindFields() {
+        admissionBinder.bind(dateAdmission, Admission::getDate, Admission::setDate);
+        admissionBinder.bind(pc, Admission::getPresentingComplaint, Admission::setPresentingComplaint);
+        admissionBinder.bind(timeAdmission, Admission::getTime, Admission::setTime);
+        admissionBinder.bind(dateAdmission, Admission::getDate, Admission::setDate);
+
+        admissionBinder.forField(nhsId).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getNhsId();
+                    }
+                    return null;
+                },
+                (admission, nhsId) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setNhsId(nhsId);
+                    }
+                });
+
+        admissionBinder.forField(nhsId).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getNhsId();
+                    }
+                    return null;
+                },
+                (admission, nhsId) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setNhsId(nhsId);
+                    }
+                });
+
+        admissionBinder.forField(hospId).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getHospId();
+                    }
+                    return null;
+                },
+                (admission, hospId) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setHospId(hospId);
+                    }
+                });
+
+        admissionBinder.forField(dob).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getDob();
+                    }
+                    return null;
+                },
+                (admission, dob) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setDob(dob);
+                    }
+                });
+
+        admissionBinder.forField(lastName).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getLastName();
+                    }
+                    return "";
+                },
+                (admission, lastName) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setLastName(lastName);
+                    }
+                });
+
+        admissionBinder.forField(firstName).bind(
+                admission -> {
+                    if (admission.getPatient() != null) {
+                        return admission.getPatient().getFirstName();
+                    }
+                    return "";
+                },
+                (admission, firstName) -> {
+                    if (admission.getPatient() != null) {
+                        admission.getPatient().setFirstName(firstName);
+                    }
+                });
     }
 
 
