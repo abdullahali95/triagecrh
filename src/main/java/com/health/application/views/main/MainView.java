@@ -22,6 +22,10 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.PWA;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +84,14 @@ public class MainView extends VerticalLayout {
         grid.removeAllColumns();
 
         grid.addColumn("news");
+        grid.addColumn(admission -> {
+            LocalDateTime from = LocalDateTime.of(admission.getDate(), admission.getTime());
+
+            LocalDateTime now = LocalDateTime.now();
+            Duration duration = Duration.between(from, now);
+            return duration.toHours();
+        }).setHeader("Wait (hrs)");
+
         grid.addColumn(admission -> {
             Patient pt = admission.getPatient();
             return pt == null ? "-" : pt.getHospId();

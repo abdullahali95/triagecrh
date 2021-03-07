@@ -1,7 +1,6 @@
 package com.health.application.views.main;
 
 import com.health.application.data.entity.Admission;
-import com.health.application.data.entity.Patient;
 import com.health.application.data.entity.Ward;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -12,6 +11,8 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -20,8 +21,10 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.validator.DateRangeValidator;
 import com.vaadin.flow.shared.Registration;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.function.DoubleToIntFunction;
 
@@ -58,6 +61,9 @@ public class AdmissionForm extends FormLayout {
         admissionBinder.bindInstanceFields(this);
         ward.setItems(wards);
         ward.setItemLabelGenerator(Ward::getWardName);
+        H2 title = new H2("Add/Edit Patient");
+        title.setId("form-h2");
+        add(title);
         add(hospId, firstName, lastName, dob, nhsId,dateAdmission,
                 timeAdmission, ward, pc, news, clerked, postTaken,
         createButtonsLayout());
@@ -96,10 +102,27 @@ public class AdmissionForm extends FormLayout {
     }
 
     private void bindFields() {
-        admissionBinder.bind(dateAdmission, Admission::getDate, Admission::setDate);
-        admissionBinder.bind(pc, Admission::getPresentingComplaint, Admission::setPresentingComplaint);
-        admissionBinder.bind(timeAdmission, Admission::getTime, Admission::setTime);
-        admissionBinder.bind(dateAdmission, Admission::getDate, Admission::setDate);
+        admissionBinder.forField(dateAdmission)
+                .withValidator(new DateRangeValidator(
+                        "Please enter a valid Date of Admission",
+                        LocalDate.of(2020, 1, 1),
+                        LocalDate.now()))
+                .bind(Admission::getDate, Admission::setDate);
+        admissionBinder
+                .forField(pc)
+                .withValidator(string -> string.length() < 40, "Too long")
+                .bind(Admission::getPresentingComplaint, Admission::setPresentingComplaint);
+        admissionBinder
+                .forField(timeAdmission)
+                .asRequired("Please enter a valid time of admission")
+                .bind(Admission::getTime, Admission::setTime);
+
+        admissionBinder
+                .forField(news)
+                .withValidator(news ->
+                        (news >=0 && news < 21),
+                        "Please enter a valid NEWS score")
+                .bind(Admission::getNews, Admission::setNews);
 
         admissionBinder.forField(nhsId).bind(
                 admission -> {
@@ -114,20 +137,13 @@ public class AdmissionForm extends FormLayout {
                     }
                 });
 
-        admissionBinder.forField(nhsId).bind(
-                admission -> {
-                    if (admission.getPatient() != null) {
-                        return admission.getPatient().getNhsId();
-                    }
-                    return null;
-                },
-                (admission, nhsId) -> {
-                    if (admission.getPatient() != null) {
-                        admission.getPatient().setNhsId(nhsId);
-                    }
-                });
-
-        admissionBinder.forField(hospId).bind(
+        admissionBinder.forField(hospId)
+                .withValidator(
+                        hospId -> (hospId > 10000 && hospId < 999999),
+                        "Please enter a valid Hospital ID"
+                )
+                .asRequired()
+                .bind(
                 admission -> {
                     if (admission.getPatient() != null) {
                         return admission.getPatient().getHospId();
@@ -139,8 +155,14 @@ public class AdmissionForm extends FormLayout {
                         admission.getPatient().setHospId(hospId);
                     }
                 });
+        hospId.setMin(10000);
 
-        admissionBinder.forField(dob).bind(
+        admissionBinder.forField(dob)
+                .withValidator(new DateRangeValidator(
+                        "Please enter a valid Date of Birth",
+                        LocalDate.of(1900, 1, 1),
+                        LocalDate.now()))
+                .bind(
                 admission -> {
                     if (admission.getPatient() != null) {
                         return admission.getPatient().getDob();

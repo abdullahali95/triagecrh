@@ -5,8 +5,7 @@ import com.health.application.data.AbstractEntity;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,8 +13,11 @@ import java.util.List;
 @Entity
 public class Patient extends AbstractEntity implements Cloneable{
 
+    @Min(value = 10000, message = "Please enter a valid Hospital ID")
+    @Max(value = 999999, message = "Please enter a valid Hospital ID")
     @NotNull
     private int hospId;
+
     private double nhsId;
 
     @NotNull
@@ -26,6 +28,7 @@ public class Patient extends AbstractEntity implements Cloneable{
     @NotEmpty
     private String lastName;
 
+    @Past(message = "Please enter a valid date of birth")
     @NotNull
     private LocalDate dob;
 

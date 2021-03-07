@@ -5,6 +5,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
 
 import com.health.application.data.AbstractEntity;
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.time.LocalTime;
 public class Admission extends AbstractEntity {
 
     @NotNull
+    @PastOrPresent(message = "Please enter a valid date of admission")
     private LocalDate date;
 
     @NotNull

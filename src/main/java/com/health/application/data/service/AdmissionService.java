@@ -80,56 +80,56 @@ public class AdmissionService {
                 wardRepository.save(ward);
             }
         }
-
-        if (patientRepository.count() == 0) {
-            Patient pt = new Patient();
-            pt.setDob(LocalDate.now());
-            pt.setFirstName("Abdullah");
-            pt.setLastName("Ali");
-            pt.setHospId(382742);
-            pt.setNhsId(4829383399d);
-            patientRepository.save(pt);
-
-            pt = new Patient();
-            pt.setDob(LocalDate.now());
-            pt.setFirstName("Oliver");
-            pt.setLastName("Twist");
-            pt.setHospId(295742);
-            pt.setNhsId(2499992299d);
-            patientRepository.save(pt);
-
-            Patient pt2 = new Patient();
-            pt2.setDob(LocalDate.now());
-            pt2.setFirstName("Nick");
-            pt2.setLastName("James");
-            pt2.setHospId(837502);
-            pt2.setNhsId(8293826633d);
-            patientRepository.save(pt2);
-
-            pt2 = new Patient();
-            pt2.setDob(LocalDate.now());
-            pt2.setFirstName("Nick");
-            pt2.setLastName("James");
-            pt2.setHospId(837502);
-            pt2.setNhsId(8293826633d);
-            patientRepository.save(pt2);
-
-        }
-
-        if (admissionRepository.count() == 0) {
-            List<Patient> patients = patientRepository.findAll();
-            List<Ward> wards = wardRepository.findAll();
-            for (int i=0; i<10; i++) {
-                Admission ad = new Admission();
-                ad.setPatient(patients.get(ThreadLocalRandom.current().nextInt(0, 3)));
-                ad.setClerked(true);
-                ad.setPostTaken(false);
-                ad.setWard(wards.get(ThreadLocalRandom.current().nextInt(0, 5)));
-                ad.setNews(ThreadLocalRandom.current().nextInt(0, 12));
-                ad.setDate(LocalDate.now());
-                ad.setTime(LocalTime.now());
-                admissionRepository.save(ad);
-            }
-        }
+//
+//        if (patientRepository.count() == 0) {
+//            Patient pt = new Patient();
+//            pt.setDob(LocalDate.now());
+//            pt.setFirstName("Abdullah");
+//            pt.setLastName("Ali");
+//            pt.setHospId(382742);
+//            pt.setNhsId(4829383399d);
+//            patientRepository.save(pt);
+//
+//            pt = new Patient();
+//            pt.setDob(LocalDate.now());
+//            pt.setFirstName("Oliver");
+//            pt.setLastName("Twist");
+//            pt.setHospId(295742);
+//            pt.setNhsId(2499992299d);
+//            patientRepository.save(pt);
+//
+//            Patient pt2 = new Patient();
+//            pt2.setDob(LocalDate.now());
+//            pt2.setFirstName("Nick");
+//            pt2.setLastName("James");
+//            pt2.setHospId(837502);
+//            pt2.setNhsId(8293826633d);
+//            patientRepository.save(pt2);
+//
+//            pt2 = new Patient();
+//            pt2.setDob(LocalDate.now());
+//            pt2.setFirstName("Nick");
+//            pt2.setLastName("James");
+//            pt2.setHospId(837502);
+//            pt2.setNhsId(8293826633d);
+//            patientRepository.save(pt2);
+//
+//        }
+//
+//        if (admissionRepository.count() == 0) {
+//            List<Patient> patients = patientRepository.findAll();
+//            List<Ward> wards = wardRepository.findAll();
+//            for (int i=0; i<10; i++) {
+//                Admission ad = new Admission();
+//                ad.setPatient(patients.get(ThreadLocalRandom.current().nextInt(0, 3)));
+//                ad.setClerked(true);
+//                ad.setPostTaken(false);
+//                ad.setWard(wards.get(ThreadLocalRandom.current().nextInt(0, 5)));
+//                ad.setNews(ThreadLocalRandom.current().nextInt(0, 12));
+//                ad.setDate(LocalDate.now());
+//                ad.setTime(LocalTime.now());
+//                admissionRepository.save(ad);
+//            }
+//        }
     }
 }
