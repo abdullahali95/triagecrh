@@ -52,6 +52,12 @@ public class AdmissionService {
         admissionRepository.save(admission);
     }
 
+    /**
+     * Gets all the admissions, then gets the patients matching search term
+     * If the patients match an admission, the admissions are returned
+     * @param stringFilter
+     * @return
+     */
     public List<Admission> findAll(String stringFilter) {
         if (stringFilter == null || stringFilter.isEmpty()) {
             return admissionRepository.findAll();
@@ -65,6 +71,31 @@ public class AdmissionService {
                 }
             }
             return finalList;
+        }
+    }
+
+    public List<Admission> findAll(int filter) {
+        if (filter == 0) {
+            return admissionRepository.findAll();
+        } else {
+            List<Admission> allAdmissions = admissionRepository.findAll();
+            List<Patient> allPts = patientRepository.search(filter);
+            List<Admission> finalList = new ArrayList<Admission>();
+            for (Admission a : allAdmissions) {
+                if (allPts.contains(a.getPatient())) {
+                    finalList.add(a);
+                }
+            }
+            return finalList;
+        }
+    }
+
+    public List<Patient> findAllPts(int filter) {
+        if (filter == 0) {
+            return null;
+        } else {
+            List<Patient> allPts = patientRepository.search(filter);
+            return allPts;
         }
     }
 

@@ -51,8 +51,8 @@ public class MainView extends VerticalLayout {
         addClassName("list-view");
         setSizeFull();
         configureGrid();
-        configureFilter();
         configureForm();
+        configureFilter();
         configureButtons();
 
         VerticalLayout forms = new VerticalLayout();
@@ -143,6 +143,11 @@ public class MainView extends VerticalLayout {
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> updateList());
+
+        admissionForm.hospId.setPlaceholder("Search Hosp no...");
+        admissionForm.hospId.setClearButtonVisible(true);
+        admissionForm.hospId.setValueChangeMode(ValueChangeMode.LAZY);
+        admissionForm.hospId.addValueChangeListener(e -> searchByHospId());
     }
 
     private void configureButtons() {
@@ -167,6 +172,29 @@ public class MainView extends VerticalLayout {
         grid.setItems(admissionService.findAll(filter.getValue()));
     }
 
+    /**
+     * If there is only one patient or patient admission, it attempts to autofind this patient
+     *
+     */
+    private void searchByHospId () {
+        if (admissionForm.hospId.getValue() == null) return;
+        List<Patient> pt = admissionService.findAllPts(admissionForm.hospId.getValue());
+        if (pt == null || pt.size() == 0) {
+            addPatient(admissionForm.hospId.getValue());
+        } else if (pt.size() == 1) {
+            List<Admission> pts = admissionService.findAll(admissionForm.hospId.getValue());
+                if (pts.size() == 1) {
+                    // Set admission
+                    editAdmission(pts.get(0));
+                } else {
+                    //Set Patient. No admission found
+                    Admission ad = new Admission();
+                    ad.setPatient(pt.get(0));
+                    editAdmission(ad);
+                }
+        }
+    }
+
     public void editAdmission(Admission admission) {
         if (admission == null) {
             closeEditor();
@@ -189,6 +217,14 @@ public class MainView extends VerticalLayout {
         grid.asSingleSelect().clear();
         Admission ad = new Admission();
         ad.setPatient(new Patient());
+        editAdmission(ad);
+    }
+
+    private void addPatient(int hospId) {
+        grid.asSingleSelect().clear();
+        Admission ad = new Admission();
+        ad.setPatient(new Patient());
+        ad.getPatient().setHospId(hospId);
         editAdmission(ad);
     }
 

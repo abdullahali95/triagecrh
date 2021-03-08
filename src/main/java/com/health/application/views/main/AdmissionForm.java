@@ -11,7 +11,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -34,7 +33,7 @@ public class AdmissionForm extends FormLayout {
     TextField firstName = new TextField("First name");
     TextField lastName = new TextField("Last name");
     DatePicker dob = new DatePicker("Date of Birth");
-    IntegerField hospId = new IntegerField("Hosp No:");
+    public IntegerField hospId = new IntegerField("Hosp No:");
     NumberField nhsId = new NumberField("NHS No:");
 
     DatePicker dateAdmission = new DatePicker("Date of Admission");
@@ -117,6 +116,7 @@ public class AdmissionForm extends FormLayout {
                 .asRequired("Please enter a valid time of admission")
                 .bind(Admission::getTime, Admission::setTime);
 
+        news.setValue(0);
         admissionBinder
                 .forField(news)
                 .withValidator(news ->
