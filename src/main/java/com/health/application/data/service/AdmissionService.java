@@ -99,6 +99,20 @@ public class AdmissionService {
         }
     }
 
+    public List<Admission>  findAllByWard(Ward ward) {
+        if (ward == null) {
+            return admissionRepository.findAll();
+        } else {
+            List<Admission> admissions = admissionRepository.findAll();
+            List<Admission> matched = new ArrayList<>();
+            for (Admission a : admissions) {
+                if (a.getWard().getWardName().equals(ward.getWardName()))  matched.add(a);
+            }
+            return matched;
+        }
+
+    }
+
 
     @PostConstruct
     public void populateTestData() {
@@ -163,4 +177,6 @@ public class AdmissionService {
 //            }
 //        }
     }
+
+
 }

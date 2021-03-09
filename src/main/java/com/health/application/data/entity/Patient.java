@@ -13,8 +13,6 @@ import java.util.List;
 @Entity
 public class Patient extends AbstractEntity implements Cloneable{
 
-    @Min(value = 10000, message = "Please enter a valid Hospital ID")
-    @Max(value = 999999, message = "Please enter a valid Hospital ID")
     @NotNull
     private int hospId;
 

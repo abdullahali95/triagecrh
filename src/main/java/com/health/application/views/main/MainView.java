@@ -7,11 +7,12 @@ import com.health.application.data.service.AdmissionService;
 import com.health.application.data.service.PatientService;
 import com.health.application.data.service.WardService;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.GridSortOrderBuilder;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -25,7 +26,7 @@ import com.vaadin.flow.server.PWA;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,9 @@ import java.util.List;
 public class MainView extends VerticalLayout {
 
     private Grid<Admission> grid = new Grid<>(Admission.class);
+    HorizontalLayout topLayout;
     private TextField filter = new TextField();
+    private ComboBox<Ward> wardSelector = new ComboBox();
     private SplitLayout content;
     private Button addPtBtn;
     private AdmissionService admissionService;
@@ -52,8 +55,8 @@ public class MainView extends VerticalLayout {
         setSizeFull();
         configureGrid();
         configureForm();
-        configureFilter();
         configureButtons();
+        configureTopLayout();
 
         VerticalLayout forms = new VerticalLayout();
         forms.addClassName("forms");
@@ -64,12 +67,8 @@ public class MainView extends VerticalLayout {
         content.setSizeFull();
         content.setSplitterPosition(70);
 
-        //Header
-        HorizontalLayout topLayout = new HorizontalLayout();
-        topLayout.addClassName("header");
-        topLayout.add(filter, addPtBtn);
-
         add(topLayout, content);
+        this.setMinWidth("900px");
         updateList();
 
 
@@ -138,7 +137,7 @@ public class MainView extends VerticalLayout {
 
     }
 
-    private void configureFilter() {
+    private void configureTopLayout() {
         filter.setPlaceholder("Search Name/Hosp no...");
         filter.setClearButtonVisible(true);
         filter.setValueChangeMode(ValueChangeMode.LAZY);
@@ -148,6 +147,30 @@ public class MainView extends VerticalLayout {
         admissionForm.hospId.setClearButtonVisible(true);
         admissionForm.hospId.setValueChangeMode(ValueChangeMode.LAZY);
         admissionForm.hospId.addValueChangeListener(e -> searchByHospId());
+
+        wardSelector.setAllowCustomValue(false);
+        wardSelector.setClearButtonVisible(true);
+
+        wardSelector.setItems(wardService.findAll());
+        wardSelector.setItemLabelGenerator(Ward::getWardName);
+        wardSelector.setPlaceholder("Filter by Ward...");
+        wardSelector.addValueChangeListener(e -> updateListByWard());
+
+        //Header
+        topLayout = new HorizontalLayout();
+        topLayout.addClassName("header");
+        topLayout.setPadding(false);
+        topLayout.setWidthFull();
+
+        wardSelector.getElement().getStyle().set("margin-right", "auto");
+        addPtBtn.getElement().getStyle().set("margin-right", "50px");
+        addPtBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        H2 title = new H2("CRH Triage System");
+        title.getElement().getStyle().set("margin-left", "50px");
+        title.getElement().getStyle().set("margin-right", "20px");
+
+        topLayout.add(title, filter, wardSelector, addPtBtn);
+        topLayout.setVerticalComponentAlignment(Alignment.END);
     }
 
     private void configureButtons() {
@@ -172,12 +195,18 @@ public class MainView extends VerticalLayout {
         grid.setItems(admissionService.findAll(filter.getValue()));
     }
 
+    private void updateListByWard() {
+        grid.setItems(admissionService.findAllByWard(wardSelector.getValue()));
+    }
+
     /**
      * If there is only one patient or patient admission, it attempts to autofind this patient
      *
      */
     private void searchByHospId () {
-        if (admissionForm.hospId.getValue() == null) return;
+        if (admissionForm.hospId.getValue() == null
+                || admissionForm.hospId.getValue() < 1000) return;
+
         List<Patient> pt = admissionService.findAllPts(admissionForm.hospId.getValue());
         if (pt == null || pt.size() == 0) {
             addPatient(admissionForm.hospId.getValue());
@@ -189,6 +218,9 @@ public class MainView extends VerticalLayout {
                 } else {
                     //Set Patient. No admission found
                     Admission ad = new Admission();
+                    ad.setDate(LocalDate.now());
+                    ad.setTime(LocalTime.now());
+
                     ad.setPatient(pt.get(0));
                     editAdmission(ad);
                 }
@@ -216,6 +248,9 @@ public class MainView extends VerticalLayout {
     private void addPatient() {
         grid.asSingleSelect().clear();
         Admission ad = new Admission();
+        ad.setDate(LocalDate.now());
+        ad.setTime(LocalTime.now());
+
         ad.setPatient(new Patient());
         editAdmission(ad);
     }
@@ -223,6 +258,9 @@ public class MainView extends VerticalLayout {
     private void addPatient(int hospId) {
         grid.asSingleSelect().clear();
         Admission ad = new Admission();
+        ad.setDate(LocalDate.now());
+        ad.setTime(LocalTime.now());
+
         ad.setPatient(new Patient());
         ad.getPatient().setHospId(hospId);
         editAdmission(ad);

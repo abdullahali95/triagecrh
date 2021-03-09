@@ -24,6 +24,7 @@ import com.vaadin.flow.data.validator.DateRangeValidator;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.function.DoubleToIntFunction;
 
@@ -64,7 +65,7 @@ public class AdmissionForm extends FormLayout {
         title.setId("form-h2");
         add(title);
         add(hospId, firstName, lastName, dob, nhsId,dateAdmission,
-                timeAdmission, ward, pc, news, clerked, postTaken,
+                timeAdmission, ward, news, pc, clerked, postTaken,
         createButtonsLayout());
         bindFields();
     }
@@ -107,6 +108,7 @@ public class AdmissionForm extends FormLayout {
                         LocalDate.of(2020, 1, 1),
                         LocalDate.now()))
                 .bind(Admission::getDate, Admission::setDate);
+
         admissionBinder
                 .forField(pc)
                 .withValidator(string -> string.length() < 40, "Too long")
@@ -139,7 +141,7 @@ public class AdmissionForm extends FormLayout {
 
         admissionBinder.forField(hospId)
                 .withValidator(
-                        hospId -> (hospId > 10000 && hospId < 999999),
+                        hospId -> (hospId > 10000 && hospId < 9999999),
                         "Please enter a valid Hospital ID"
                 )
                 .asRequired()

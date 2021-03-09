@@ -23,6 +23,10 @@
 .list-view .header {
 }
 
-.form-h1 {
-    color: blue;
+h2 {
+    font-weight: 650;
+    color: #004ecb;
+    margin: 0px;
+    padding: 0px;
+    white-space: nowrap;
 }
