@@ -12,6 +12,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,6 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @CssImport("./styles/shared-styles.css")
+@CssImport(
+        themeFor = "vaadin-grid",
+        value = "./styles/dynamic-grid-row-background-color.css"
+)
 @PWA(name = "Triage CRH", shortName = "Triage CRH", enableInstallPrompt = false)
 @Route("")
 public class MainView extends VerticalLayout {
@@ -89,7 +95,7 @@ public class MainView extends VerticalLayout {
             LocalDateTime now = LocalDateTime.now();
             Duration duration = Duration.between(from, now);
             return duration.toHours();
-        }).setHeader("Wait (hrs)");
+        }).setHeader("Wait (hrs)").setKey("wait");
 
         grid.addColumn(admission -> {
             Patient pt = admission.getPatient();
@@ -164,13 +170,16 @@ public class MainView extends VerticalLayout {
 
         wardSelector.getElement().getStyle().set("margin-right", "auto");
         addPtBtn.getElement().getStyle().set("margin-right", "50px");
+        addPtBtn.getElement().getStyle().set("margin-left", "20px");
         addPtBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         H2 title = new H2("CRH Triage System");
         title.getElement().getStyle().set("margin-left", "50px");
         title.getElement().getStyle().set("margin-right", "20px");
 
-        topLayout.add(title, filter, wardSelector, addPtBtn);
-        topLayout.setVerticalComponentAlignment(Alignment.END);
+        Anchor logout = new Anchor("logout", "Log out");
+
+        topLayout.add(title, filter, wardSelector, logout, addPtBtn);
+        topLayout.setAlignItems(Alignment.CENTER);
     }
 
     private void configureButtons() {
@@ -183,7 +192,7 @@ public class MainView extends VerticalLayout {
         List<GridSortOrder<Admission>> sortList = new ArrayList<GridSortOrder<Admission>>();
 
         GridSortOrder gsort2 = new GridSortOrder<Admission>(grid.getColumnByKey("wardName"),SortDirection.ASCENDING);
-        GridSortOrder gsort = new GridSortOrder<Admission>(grid.getColumnByKey("news"),SortDirection.DESCENDING);
+        GridSortOrder gsort = new GridSortOrder<Admission>(grid.getColumnByKey("wait"),SortDirection.DESCENDING);
 
         sortList.add(gsort);
         sortList.add(gsort2);
@@ -193,10 +202,25 @@ public class MainView extends VerticalLayout {
 
     private void updateList() {
         grid.setItems(admissionService.findAll(filter.getValue()));
+
+        setSeverityLabels();
     }
 
     private void updateListByWard() {
         grid.setItems(admissionService.findAllByWard(wardSelector.getValue()));
+        setSeverityLabels();
+    }
+
+    private void setSeverityLabels() {
+        grid.setClassNameGenerator(admission ->
+        {   if (admission.getNews() <=4) {
+            return "low";
+        } else if (admission.getNews() >8) {
+            return "high";
+        } else return "medium";
+        });
+
+
     }
 
     /**
