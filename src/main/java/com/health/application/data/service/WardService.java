@@ -39,4 +39,7 @@ public class WardService {
         repository.save(ward);
     }
 
+    public Ward findEMU() {
+        return repository.findEmu();
+    }
 }

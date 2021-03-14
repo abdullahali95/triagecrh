@@ -1,9 +1,6 @@
 package com.health.application.data.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotEmpty;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 
@@ -31,10 +28,18 @@ public class Admission extends AbstractEntity {
     @JoinColumn(name = "ward_id")
     private Ward ward;
 
-    private boolean clerked;
+    public enum ClerkedBy {
+        None, Reg, IMT, SHO, F1, PA, ACP, MedStudent
+    };
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private Admission.ClerkedBy clerkedBy;
     private boolean postTaken;
     private String presentingComplaint;
     private Integer news;
+    private boolean dischargeable;
+    private boolean urgentClerk;
+    private int frailtyScore;
 
     public LocalDate getDate() {
         return date;
@@ -60,12 +65,6 @@ public class Admission extends AbstractEntity {
     public void setWard(Ward ward) {
         this.ward = ward;
     }
-    public boolean isClerked() {
-        return clerked;
-    }
-    public void setClerked(boolean clerked) {
-        this.clerked = clerked;
-    }
     public boolean isPostTaken() {
         return postTaken;
     }
@@ -84,5 +83,15 @@ public class Admission extends AbstractEntity {
     public void setNews(Integer news) {
         this.news = news;
     }
+    public ClerkedBy getClerkedBy() {return clerkedBy;}
+    public void setClerkedBy(ClerkedBy clerkedBy) {
+        this.clerkedBy = clerkedBy;
+    }
+    public boolean isDischargeable() {return dischargeable;}
+    public void setDischargeable(boolean dischargeable) {this.dischargeable = dischargeable;}
+    public boolean isUrgentClerk() {return urgentClerk;}
+    public void setUrgentClerk(boolean urgentClerk) {this.urgentClerk = urgentClerk;}
+    public int getFrailtyScore() {return frailtyScore;}
+    public void setFrailtyScore(int frailtyScore) {this.frailtyScore = frailtyScore;}
 
 }

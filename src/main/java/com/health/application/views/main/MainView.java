@@ -37,7 +37,7 @@ import java.util.List;
         themeFor = "vaadin-grid",
         value = "./styles/dynamic-grid-row-background-color.css"
 )
-@PWA(name = "Triage CRH", shortName = "Triage CRH", enableInstallPrompt = false)
+@PWA(name = "CRH Triage System", shortName = "Triage", enableInstallPrompt = false)
 @Route("")
 public class MainView extends VerticalLayout {
 
@@ -74,7 +74,7 @@ public class MainView extends VerticalLayout {
         content.setSplitterPosition(70);
 
         add(topLayout, content);
-        this.setMinWidth("900px");
+        this.setMinWidth("1000px");
         updateList();
 
 
@@ -112,17 +112,15 @@ public class MainView extends VerticalLayout {
             return ward == null ? "-" : ward.getWardName();
         }).setKey("wardName").setHeader("Ward");
 
-        TemplateRenderer<Admission> clerkedRenderer = TemplateRenderer.<Admission>of(
-                "<iron-icon hidden='[[!item.clerked]]' icon='vaadin:check' style='width: var(--lumo-icon-size-s); " +
-                        "height: var(--lumo-icon-size-s); color: var(--lumo-primary-text-color);'></iron-icon><iron-icon " +
-                        "hidden='[[item.clerked]]' icon='vaadin:minus' style='width: var(--lumo-icon-size-s); " +
-                        "height: var(--lumo-icon-size-s); color: var(--lumo-disabled-text-color);'></iron-icon>")
-                .withProperty("clerked", Admission::isClerked);
-        grid.addColumn(clerkedRenderer).setHeader("Clerked").setAutoWidth(true);
-        TemplateRenderer<Admission> postTakenRenderer = TemplateRenderer.<Admission>of(
-                "<iron-icon hidden='[[!item.postTaken]]' icon='vaadin:check' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-primary-text-color);'></iron-icon><iron-icon hidden='[[item.postTaken]]' icon='vaadin:minus' style='width: var(--lumo-icon-size-s); height: var(--lumo-icon-size-s); color: var(--lumo-disabled-text-color);'></iron-icon>")
-                .withProperty("postTaken", Admission::isPostTaken);
-        grid.addColumn(postTakenRenderer).setHeader("Post Taken").setAutoWidth(true);
+        grid.addColumn(admission -> {
+            Admission.ClerkedBy clerkedBy = admission.getClerkedBy();
+            return clerkedBy == null ? "-" : clerkedBy;
+        })
+                .setHeader("Clerked By").setAutoWidth(true);
+        grid.addColumn(admission -> {
+            return (admission.isPostTaken()) ? "Yes" : "No" ;
+        })
+                .setHeader("Post-taken").setAutoWidth(true);
         grid.addColumn("presentingComplaint");
 
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
@@ -202,7 +200,6 @@ public class MainView extends VerticalLayout {
 
     private void updateList() {
         grid.setItems(admissionService.findAll(filter.getValue()));
-
         setSeverityLabels();
     }
 
@@ -244,6 +241,7 @@ public class MainView extends VerticalLayout {
                     Admission ad = new Admission();
                     ad.setDate(LocalDate.now());
                     ad.setTime(LocalTime.now());
+                    ad.setWard(wardService.findEMU());
 
                     ad.setPatient(pt.get(0));
                     editAdmission(ad);
@@ -274,6 +272,8 @@ public class MainView extends VerticalLayout {
         Admission ad = new Admission();
         ad.setDate(LocalDate.now());
         ad.setTime(LocalTime.now());
+        ad.setWard(wardService.findEMU());
+
 
         ad.setPatient(new Patient());
         editAdmission(ad);
@@ -284,6 +284,7 @@ public class MainView extends VerticalLayout {
         Admission ad = new Admission();
         ad.setDate(LocalDate.now());
         ad.setTime(LocalTime.now());
+        ad.setWard(wardService.findEMU());
 
         ad.setPatient(new Patient());
         ad.getPatient().setHospId(hospId);

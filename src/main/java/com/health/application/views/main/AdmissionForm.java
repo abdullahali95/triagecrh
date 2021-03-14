@@ -24,9 +24,8 @@ import com.vaadin.flow.data.validator.DateRangeValidator;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.function.DoubleToIntFunction;
+import java.util.Locale;
 
 public class AdmissionForm extends FormLayout {
 
@@ -40,11 +39,15 @@ public class AdmissionForm extends FormLayout {
     DatePicker dateAdmission = new DatePicker("Date of Admission");
     TimePicker timeAdmission = new TimePicker("Time of Admission");
     ComboBox<Ward> ward = new ComboBox<>("Ward");
+    IntegerField frailtyScore = new IntegerField("Frailty Score");
     TextField pc = new TextField("Presenting Complaint");
     IntegerField news = new IntegerField("NEWS Score");
 
-    Checkbox clerked = new Checkbox("Clerked");
+    ComboBox<Admission.ClerkedBy> clerkedBy = new ComboBox<>("Clerked By");
     Checkbox postTaken = new Checkbox("Post-Taken");
+    Checkbox urgentClerk = new Checkbox("Clerk Urgently (Nurses only)");
+    Checkbox dischargeable = new Checkbox("?Discharge");
+
 
     Button save = new Button("Save");
     Button delete = new Button("Delete");
@@ -58,14 +61,16 @@ public class AdmissionForm extends FormLayout {
         addClassName("admission-form");
 
         bindFields();
-        admissionBinder.bindInstanceFields(this);
         ward.setItems(wards);
         ward.setItemLabelGenerator(Ward::getWardName);
+        admissionBinder.bindInstanceFields(this);
+
         H2 title = new H2("Add/Edit Patient");
         title.setId("form-h2");
         add(title);
         add(hospId, firstName, lastName, dob, nhsId,dateAdmission,
-                timeAdmission, ward, news, pc, clerked, postTaken,
+                timeAdmission, ward, news, frailtyScore, pc, urgentClerk,
+                dischargeable, clerkedBy, postTaken,
         createButtonsLayout());
         bindFields();
     }
@@ -102,12 +107,22 @@ public class AdmissionForm extends FormLayout {
     }
 
     private void bindFields() {
+        news.setWidth("5em");
+
+        admissionBinder
+                .forField(clerkedBy)
+                .bind(Admission::getClerkedBy, Admission::setClerkedBy);
+        clerkedBy.setItems(Admission.ClerkedBy.values());
+
+
         admissionBinder.forField(dateAdmission)
                 .withValidator(new DateRangeValidator(
                         "Please enter a valid Date of Admission",
                         LocalDate.of(2020, 1, 1),
                         LocalDate.now()))
                 .bind(Admission::getDate, Admission::setDate);
+            dateAdmission.setLocale(Locale.UK);
+
 
         admissionBinder
                 .forField(pc)
@@ -122,11 +137,12 @@ public class AdmissionForm extends FormLayout {
         admissionBinder
                 .forField(news)
                 .withValidator(news ->
-                        (news >=0 && news < 21),
+                        (news == null || (news >=0 && news < 21)),
                         "Please enter a valid NEWS score")
                 .bind(Admission::getNews, Admission::setNews);
 
-        admissionBinder.forField(nhsId).bind(
+        admissionBinder.forField(nhsId)
+                .bind(
                 admission -> {
                     if (admission.getPatient() != null) {
                         return admission.getPatient().getNhsId();
@@ -141,7 +157,7 @@ public class AdmissionForm extends FormLayout {
 
         admissionBinder.forField(hospId)
                 .withValidator(
-                        hospId -> (hospId > 10000 && hospId < 9999999),
+                        hospId -> (hospId == null || (hospId > 10000 && hospId < 9999999)),
                         "Please enter a valid Hospital ID"
                 )
                 .asRequired()
@@ -176,6 +192,7 @@ public class AdmissionForm extends FormLayout {
                         admission.getPatient().setDob(dob);
                     }
                 });
+        dob.setLocale(Locale.UK);
 
         admissionBinder.forField(lastName).bind(
                 admission -> {
