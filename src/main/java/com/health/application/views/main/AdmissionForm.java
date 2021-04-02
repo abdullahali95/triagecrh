@@ -111,6 +111,7 @@ public class AdmissionForm extends FormLayout {
 
         admissionBinder
                 .forField(clerkedBy)
+                .asRequired("Please select")
                 .bind(Admission::getClerkedBy, Admission::setClerkedBy);
         clerkedBy.setItems(Admission.ClerkedBy.values());
 
@@ -133,13 +134,19 @@ public class AdmissionForm extends FormLayout {
                 .asRequired("Please enter a valid time of admission")
                 .bind(Admission::getTime, Admission::setTime);
 
-        news.setValue(0);
         admissionBinder
                 .forField(news)
                 .withValidator(news ->
                         (news == null || (news >=0 && news < 21)),
                         "Please enter a valid NEWS score")
                 .bind(Admission::getNews, Admission::setNews);
+
+        admissionBinder
+                .forField(frailtyScore)
+                .withValidator(frailtyScore ->
+                                (frailtyScore == null || (frailtyScore >=1 && frailtyScore < 10)),
+                        "Please enter a valid Frailty Score score")
+                .bind(Admission::getFrailtyScore, Admission::setFrailtyScore);
 
         admissionBinder.forField(nhsId)
                 .bind(
